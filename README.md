@@ -17,7 +17,7 @@ Ein Discord-Bot der Musik von YouTube abspielt.
 ## Installation
 
 ```bash
-git clone https://github.com/DEIN_USERNAME/DEIN_REPO.git
+git clone https://github.com/ihatecan/discord-musicbot.git
 cd DEIN_REPO
 cp .env.example .env
 ```
