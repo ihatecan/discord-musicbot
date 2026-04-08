@@ -11,7 +11,8 @@ Ein Discord-Bot der Musik von YouTube abspielt.
 
 ## Voraussetzungen
 
-- [Docker](https://www.docker.com/get-started) installiert
+- **Windows:** [Docker Desktop](https://www.docker.com/products/docker-desktop/) installieren (inkl. WSL2-Backend — Docker Desktop fragt beim ersten Start automatisch danach)
+- **Mac/Linux:** [Docker](https://www.docker.com/get-started) installieren
 - Ein Discord Bot Token ([Anleitung](#bot-token-erstellen))
 
 ## Installation
