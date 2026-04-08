@@ -141,41 +141,32 @@ class Music(commands.Cog):
                 state.current = None
                 continue
 
-            # Warten bis Voice-Verbindung wirklich bereit ist
-            for _ in range(20):
-                if state.voice_client.is_connected():
-                    break
-                await asyncio.sleep(0.5)
-            else:
-                await ctx.send("Timeout: Voice-Verbindung nicht bereit.")
-                state.current = None
-                continue
-
-            print(f"[DEBUG] Voice bereit: {state.voice_client.is_connected()}, starte FFmpeg...")
-
-            try:
-                source = discord.PCMVolumeTransformer(
-                    discord.FFmpegPCMAudio(song.source_url, **FFMPEG_OPTIONS),
-                    volume=state.volume,
-                )
-            except Exception as e:
-                print(f"[DEBUG] FFmpeg Fehler: {e}")
-                await ctx.send(f"FFmpeg Fehler: {e}")
-                state.current = None
-                continue
+            source = discord.PCMVolumeTransformer(
+                discord.FFmpegPCMAudio(song.source_url, **FFMPEG_OPTIONS),
+                volume=state.volume,
+            )
 
             finished = asyncio.Event()
 
             def after_play(error):
                 if error:
-                    print(f"[DEBUG] Player-Fehler: {error}")
+                    print(f"Player-Fehler: {error}")
                     self.bot.loop.create_task(ctx.send(f"Fehler bei der Wiedergabe: {error}"))
-                else:
-                    print("[DEBUG] Song fertig gespielt.")
                 finished.set()
 
-            state.voice_client.play(source, after=after_play)
-            print("[DEBUG] voice_client.play() aufgerufen")
+            # Retry falls Voice-Verbindung noch nicht bereit
+            for attempt in range(10):
+                try:
+                    state.voice_client.play(source, after=after_play)
+                    break
+                except discord.ClientException:
+                    if attempt == 9:
+                        await ctx.send("Fehler: Konnte nichts abspielen.")
+                        state.current = None
+                        break
+                    await asyncio.sleep(0.5)
+            else:
+                continue
 
             embed = discord.Embed(
                 title="Spielt jetzt",
