@@ -3,13 +3,22 @@ import discord
 from discord.ext import commands
 from config import TOKEN, PREFIX
 
-# Opus manuell laden (nötig auf macOS)
+# Opus laden - macOS (Homebrew) braucht manuellen Pfad, Linux findet es automatisch
 if not discord.opus.is_loaded():
-    try:
-        discord.opus.load_opus("/opt/homebrew/lib/libopus.dylib")
-        print("Opus geladen.")
-    except Exception as e:
-        print(f"Opus konnte nicht geladen werden: {e}")
+    opus_paths = [
+        "/opt/homebrew/lib/libopus.dylib",  # macOS ARM (Apple Silicon)
+        "/usr/local/lib/libopus.dylib",     # macOS Intel
+        "libopus.so.0",                     # Linux (Docker)
+    ]
+    for path in opus_paths:
+        try:
+            discord.opus.load_opus(path)
+            print(f"Opus geladen: {path}")
+            break
+        except Exception:
+            continue
+    else:
+        print("Opus nicht manuell geladen (wird evtl. automatisch gefunden)")
 
 intents = discord.Intents.default()
 intents.message_content = True
